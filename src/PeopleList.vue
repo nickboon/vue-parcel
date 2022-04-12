@@ -2,14 +2,21 @@
 export default {
   data() {
     return {
-      people:[]
+      people:[],
+      errorMessage: ''
     }
   },
-  mounted() {
-    fetch("https://services.odata.org/TripPinRESTierService/(S(j3a2sx1yypgxj1mpzjgmsrgn))/People")
-      .then(response => response.json())
-      .then(data => this.people = data.value)
-      .catch(error => console.log(error.message));
+
+  async mounted() {
+    const uri = "https://services.odata.org/TripPinRESTierService/(S(j3a2sx1yypgxj1mpzjgmsrgn))/People"
+    this.errorMessage = '';
+    try {        
+        const response = await fetch(uri);
+        const json = await response.json();
+        this.people = json.value;
+    } catch (error) {
+        this.errorMessage = error.message;
+    }
   }
 }
 </script>
@@ -18,7 +25,10 @@ export default {
 <!-- shouldn't have to wrap root component but getting eslinting from Vetur plugin -->
 <div>
   <h1>People</h1>
-  <ul v-if="people.length">
+  <div v-if="errorMessage">
+      Could not retrieve people.
+  </div>
+  <ul v-else-if="people.length">
     <li v-for="person in people" :key="person.UserName">
       {{ person.UserName }}
     </li>
